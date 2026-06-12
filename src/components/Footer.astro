@@ -1,0 +1,13 @@
+---
+import { SITE } from '../site';
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-mist">
+  <div
+    class="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between"
+  >
+    <p>&copy; {year} {SITE.name}</p>
+    <p>{SITE.role} &middot; Show jumping &amp; eventing</p>
+  </div>
+</footer>

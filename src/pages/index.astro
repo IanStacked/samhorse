@@ -1,0 +1,69 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HorseCard from '../components/HorseCard.astro';
+import { SITE, NAV } from '../site';
+import hero from '../assets/hero.png';
+
+const horses = (await getCollection('horses')).sort((a, b) =>
+  a.data.name.localeCompare(b.data.name),
+);
+const sections = NAV.filter((n) => n.href !== '/');
+---
+
+<BaseLayout>
+  <!-- Hero -->
+  <section class="relative">
+    <div class="aspect-[21/9] w-full overflow-hidden bg-mist sm:aspect-[3/1]">
+      <Image
+        src={hero}
+        alt={`${SITE.name} riding`}
+        widths={[768, 1280, 1920, 2400]}
+        sizes="100vw"
+        class="h-full w-full object-cover"
+        loading="eager"
+      />
+    </div>
+    <div class="mx-auto max-w-6xl px-5 py-10 sm:py-14">
+      <p class="text-sm font-medium uppercase tracking-widest text-accent">{SITE.role}</p>
+      <h1 class="mt-2 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
+        {SITE.name}
+      </h1>
+      <!-- TODO: confirm bio copy -->
+      <p class="mt-4 max-w-2xl text-lg text-muted">
+        Show jumping and eventing across the UK circuit. This is a home for my
+        horses, my competition results, and the moments worth keeping from the
+        season.
+      </p>
+    </div>
+  </section>
+
+  <!-- Section links -->
+  <section class="mx-auto max-w-6xl px-5 pb-12">
+    <div class="grid gap-3 sm:grid-cols-3">
+      {
+        sections.map((s) => (
+          <a
+            href={s.href}
+            class="group flex items-center justify-between rounded-xl border border-mist px-5 py-4 transition-colors hover:border-accent"
+          >
+            <span class="font-medium">{s.label}</span>
+            <span class="text-muted transition-transform group-hover:translate-x-1 group-hover:text-accent">&rarr;</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Horses preview -->
+  <section class="mx-auto max-w-6xl px-5 pb-16">
+    <div class="mb-6 flex items-baseline justify-between">
+      <h2 class="text-2xl font-semibold tracking-tight">The horses</h2>
+      <a href="/horses" class="text-sm text-accent hover:underline">View all &rarr;</a>
+    </div>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {horses.map((horse) => <HorseCard horse={horse} />)}
+    </div>
+  </section>
+</BaseLayout>

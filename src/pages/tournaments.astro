@@ -1,0 +1,36 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TournamentList from '../components/TournamentList.astro';
+import type { TournamentItem } from '../types';
+
+const tournaments = (await getCollection('tournaments')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+
+const items: TournamentItem[] = await Promise.all(
+  tournaments.map(async (t) => {
+    const horse = await getEntry(t.data.horse);
+    return {
+      id: t.id,
+      name: t.data.name,
+      date: t.data.date,
+      location: t.data.location,
+      placement: t.data.placement,
+      horseId: horse?.id,
+      horseName: horse?.data.name,
+    };
+  }),
+);
+---
+
+<BaseLayout title="Tournaments" description="Competition results, newest first.">
+  <section class="mx-auto max-w-4xl px-5 py-10 sm:py-14">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Tournaments</h1>
+    <p class="mt-2 text-muted">Competition results, most recent first.</p>
+
+    <div class="mt-8">
+      <TournamentList items={items} />
+    </div>
+  </section>
+</BaseLayout>

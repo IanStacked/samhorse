@@ -1,0 +1,89 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TournamentList from '../../components/TournamentList.astro';
+import PhotoGrid from '../../components/PhotoGrid.astro';
+import type { TournamentItem, PhotoItem } from '../../types';
+import { horseAge } from '../../site';
+
+export async function getStaticPaths() {
+  const horses = await getCollection('horses');
+  return horses.map((horse) => ({ params: { id: horse.id }, props: { horse } }));
+}
+
+const { horse } = Astro.props;
+const { name, breed, discipline, foaled, photo } = horse.data;
+const { Content } = await render(horse);
+
+const results: TournamentItem[] = (await getCollection('tournaments'))
+  .filter((t) => t.data.horse.id === horse.id)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .map((t) => ({
+    id: t.id,
+    name: t.data.name,
+    date: t.data.date,
+    location: t.data.location,
+    placement: t.data.placement,
+  }));
+
+const photos: PhotoItem[] = (await getCollection('photos'))
+  .filter((p) => p.data.horse?.id === horse.id)
+  .sort((a, b) => b.data.year - a.data.year)
+  .map((p) => ({ image: p.data.image, caption: p.data.caption, year: p.data.year }));
+---
+
+<BaseLayout title={name} description={`${name} — ${breed}, ${discipline}.`}>
+  <article class="mx-auto max-w-6xl px-5 py-10 sm:py-14">
+    <a href="/horses" class="text-sm text-muted hover:text-accent">&larr; All horses</a>
+
+    <div class="mt-6 grid gap-8 md:grid-cols-2 md:gap-12">
+      <div class="aspect-[3/2] overflow-hidden rounded-2xl bg-mist">
+        <Image
+          src={photo}
+          alt={`${name}, a ${breed}`}
+          widths={[480, 768, 1024]}
+          sizes="(min-width: 768px) 45vw, 90vw"
+          class="h-full w-full object-cover"
+          loading="eager"
+        />
+      </div>
+
+      <div>
+        <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">{name}</h1>
+        <p class="mt-1 text-accent">{discipline}</p>
+        <dl class="mt-6 grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <dt class="text-muted">Breed</dt>
+            <dd class="font-medium">{breed}</dd>
+          </div>
+          <div>
+            <dt class="text-muted">Age</dt>
+            <dd class="font-medium">{horseAge(foaled)} yrs <span class="text-muted">(foaled {foaled})</span></dd>
+          </div>
+        </dl>
+        <div class="mt-6 space-y-4 leading-relaxed text-ink">
+          <Content />
+        </div>
+      </div>
+    </div>
+
+    {
+      results.length > 0 && (
+        <section class="mt-14">
+          <h2 class="mb-4 text-2xl font-semibold tracking-tight">Results</h2>
+          <TournamentList items={results} showHorse={false} />
+        </section>
+      )
+    }
+
+    {
+      photos.length > 0 && (
+        <section class="mt-14">
+          <h2 class="mb-4 text-2xl font-semibold tracking-tight">Photos</h2>
+          <PhotoGrid items={photos} />
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

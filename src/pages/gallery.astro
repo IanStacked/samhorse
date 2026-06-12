@@ -1,0 +1,86 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PhotoGrid from '../components/PhotoGrid.astro';
+import type { PhotoItem } from '../types';
+
+const photos = (await getCollection('photos')).sort(
+  (a, b) => b.data.year - a.data.year || a.data.caption.localeCompare(b.data.caption),
+);
+
+const items: PhotoItem[] = await Promise.all(
+  photos.map(async (p) => {
+    const horse = p.data.horse ? await getEntry(p.data.horse) : undefined;
+    return {
+      image: p.data.image,
+      caption: p.data.caption,
+      year: p.data.year,
+      horseId: horse?.id,
+      horseName: horse?.data.name,
+    };
+  }),
+);
+
+// Filter option lists, de-duplicated.
+const horseOptions = [
+  ...new Map(
+    items.filter((i) => i.horseId).map((i) => [i.horseId, i.horseName]),
+  ).entries(),
+];
+const yearOptions = [...new Set(items.map((i) => i.year))].sort((a, b) => b - a);
+
+const selectClass =
+  'rounded-lg border border-mist bg-paper px-3 py-2 text-sm focus-visible:border-accent';
+---
+
+<BaseLayout title="Gallery" description="Photo gallery, filterable by horse and year.">
+  <section class="mx-auto max-w-6xl px-5 py-10 sm:py-14">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Gallery</h1>
+    <p class="mt-2 text-muted">Filter by horse or year.</p>
+
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <label class="flex items-center gap-2 text-sm text-muted">
+        Horse
+        <select id="filter-horse" class={selectClass}>
+          <option value="">All</option>
+          {horseOptions.map(([id, label]) => <option value={id}>{label}</option>)}
+        </select>
+      </label>
+      <label class="flex items-center gap-2 text-sm text-muted">
+        Year
+        <select id="filter-year" class={selectClass}>
+          <option value="">All</option>
+          {yearOptions.map((y) => <option value={y}>{y}</option>)}
+        </select>
+      </label>
+    </div>
+
+    <div class="mt-8">
+      <PhotoGrid items={items} />
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const horse = document.getElementById('filter-horse') as HTMLSelectElement | null;
+  const year = document.getElementById('filter-year') as HTMLSelectElement | null;
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.photo-item'));
+  const empty = document.getElementById('photo-empty');
+
+  function apply() {
+    const h = horse?.value ?? '';
+    const y = year?.value ?? '';
+    let visible = 0;
+    for (const el of items) {
+      const matchH = !h || el.dataset.horse === h;
+      const matchY = !y || el.dataset.year === y;
+      const show = matchH && matchY;
+      el.classList.toggle('hidden', !show);
+      if (show) visible++;
+    }
+    empty?.classList.toggle('hidden', visible > 0);
+  }
+
+  horse?.addEventListener('change', apply);
+  year?.addEventListener('change', apply);
+</script>

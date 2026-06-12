@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* Modern & minimal theme — photo-forward, near-mono with one green accent. */
+@theme {
+  --color-paper: #ffffff;
+  --color-mist: #f2f2f0;
+  --color-ink: #18181b;
+  --color-muted: #6b6b70;
+  --color-accent: #3f6f52;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Visible focus ring for keyboard users across interactive elements. */
+:where(a, button, summary, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

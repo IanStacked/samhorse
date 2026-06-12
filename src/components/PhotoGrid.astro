@@ -1,0 +1,43 @@
+---
+import { Image } from 'astro:assets';
+import type { PhotoItem } from '../types';
+
+interface Props {
+  items: PhotoItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul
+  id="photo-grid"
+  class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
+>
+  {
+    items.map((p) => (
+      <li
+        class="photo-item"
+        data-horse={p.horseId ?? ''}
+        data-year={p.year}
+      >
+        <figure class="overflow-hidden rounded-lg bg-mist">
+          <Image
+            src={p.image}
+            alt={p.caption}
+            widths={[240, 480, 720]}
+            sizes="(min-width: 1024px) 23vw, (min-width: 640px) 30vw, 45vw"
+            class="aspect-square w-full object-cover"
+          />
+          <figcaption class="px-1 py-2 text-xs text-muted">
+            {p.caption}
+            {p.horseName && <span class="text-ink"> &middot; {p.horseName}</span>}
+          </figcaption>
+        </figure>
+      </li>
+    ))
+  }
+</ul>
+
+<p id="photo-empty" class="hidden py-12 text-center text-muted">
+  No photos match that filter.
+</p>

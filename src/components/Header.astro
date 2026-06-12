@@ -1,0 +1,59 @@
+---
+import { SITE, NAV } from '../site';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path.startsWith(href);
+---
+
+<header class="sticky top-0 z-40 border-b border-mist bg-paper/90 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+    <a href="/" class="text-lg font-semibold tracking-tight">{SITE.name}</a>
+
+    <button
+      id="nav-toggle"
+      type="button"
+      class="md:hidden"
+      aria-controls="nav-menu"
+      aria-expanded="false"
+      aria-label="Toggle navigation menu"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    </button>
+
+    <nav aria-label="Primary" class="hidden w-full md:block md:w-auto" id="nav-menu">
+      <ul class="mt-4 flex flex-col gap-1 md:mt-0 md:flex-row md:gap-6">
+        {
+          NAV.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+                class:list={[
+                  'block py-1.5 text-sm transition-colors hover:text-accent',
+                  isActive(item.href) ? 'text-accent font-medium' : 'text-muted',
+                ]}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('nav-menu');
+  toggle?.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!open));
+    menu?.classList.toggle('hidden', open);
+  });
+</script>
