@@ -7,9 +7,10 @@ backend:
   name: github
   repo: IanStacked/samhorse
   branch: main
-  # For one-click "Sign in with GitHub" (instead of pasting a token), deploy the
-  # Sveltia CMS Authenticator worker and uncomment, pointing at it:
-  # base_url: https://YOUR-AUTHENTICATOR.workers.dev
+  # One-click "Sign in with GitHub" via the Sveltia CMS Authenticator worker.
+  # This is the worker root (no /callback) — the GitHub OAuth app's callback URL
+  # is this value + /callback.
+  base_url: https://sveltia-cms-auth.ian-rodgers156.workers.dev
 
 # Default upload location; overridden per image field below so the saved path
 # is a relative import that Astro's <Image /> can optimize.

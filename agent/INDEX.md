@@ -17,7 +17,8 @@
 | `src/content.config.ts` | Content collection definitions (`horses`, `tournaments`, `photos`) with Zod schemas |
 | `src/content/` | Collection data: `horses/*.md` (bio in body), `tournaments/*.yaml`, `photos/*.yaml` |
 | `src/assets/` | Local images referenced by collections via the `image()` schema helper, so Astro optimizes them. Never put browser-facing images in `public/`. |
-| `public/` | Static assets served verbatim at the site root (currently: favicons) |
+| `public/` | Static assets served verbatim at the site root (favicons) |
+| `public/admin/` | Sveltia CMS — `index.html` (loads the CMS) + `config.yml` (forms mirroring the collection schemas). Served at `/admin/`. Edits commit to the repo → host rebuilds |
 | `astro.config.mjs` | Astro config — registers the Tailwind v4 Vite plugin (`@tailwindcss/vite`) |
 | `tsconfig.json` | TypeScript config (extends `astro/tsconfigs/strict`) |
 | `package.json` | Project manifest and npm scripts |
@@ -56,6 +57,13 @@
 | `npm run dev` | Start dev server at `localhost:4321` |
 | `npm run build` | Build to `dist/` |
 | `npm run preview` | Preview the production build locally |
+
+## Deployment & editing
+
+- **Repo**: `IanStacked/samhorse` on GitHub (private), default branch `main`.
+- **Hosting**: live at **https://samhorse.pages.dev/** via **Cloudflare Pages (static)** connected to the repo — build `npm run build`, output `dist`, auto-rebuilds on push. Must be a *static Pages* project: the **Workers** import flow injects `@astrojs/cloudflare`, which breaks `<Image />` (routes it to a runtime Images binding) and force-adds a KV SESSION binding that fails to deploy. This site is fully static and needs **no adapter** — verify build logs have no `[@astrojs/cloudflare]` lines.
+- **CMS**: Sveltia CMS at `/admin` (`public/admin/`). `config.yml` collections **must stay in sync** with `src/content.config.ts` — if you add/rename a schema field, update both. Image fields use per-field `public_folder: ../../assets/<dir>` so saved paths are relative imports Astro can optimize.
+- **CMS auth**: simplest is a GitHub Personal Access Token (no infra); one-click "Sign in with GitHub" needs a (free) Sveltia CMS Authenticator worker + GitHub OAuth app, set via `backend.base_url` in `config.yml`. Sveltia also runs locally with no auth at `localhost:4321/admin/index.html` (Chromium, File System Access API) for testing.
 
 ## Gotchas
 
