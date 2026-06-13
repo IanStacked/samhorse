@@ -1,0 +1,95 @@
+# Sveltia CMS configuration.
+# Edits made in the CMS are committed straight to this GitHub repo, which
+# triggers the host to rebuild and redeploy. Mirrors the Zod schemas in
+# src/content.config.ts — keep the two in sync if you change fields.
+
+backend:
+  name: github
+  repo: IanStacked/samhorse
+  branch: main
+  # For one-click "Sign in with GitHub" (instead of pasting a token), deploy the
+  # Sveltia CMS Authenticator worker and uncomment, pointing at it:
+  # base_url: https://YOUR-AUTHENTICATOR.workers.dev
+
+# Default upload location; overridden per image field below so the saved path
+# is a relative import that Astro's <Image /> can optimize.
+media_folder: src/assets
+public_folder: /src/assets
+
+collections:
+  - name: horses
+    label: Horses
+    label_singular: Horse
+    folder: src/content/horses
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: frontmatter
+    summary: "{{name}} ({{breed}})"
+    fields:
+      - { name: name, label: Name, widget: string }
+      - { name: breed, label: Breed, widget: string }
+      - { name: discipline, label: Discipline, widget: string }
+      - { name: foaled, label: Foaled (birth year), widget: number, value_type: int, min: 1980, max: 2035 }
+      - name: photo
+        label: Photo
+        widget: image
+        media_folder: /src/assets/horses
+        public_folder: ../../assets/horses
+      - { name: body, label: Bio, widget: markdown }
+
+  - name: tournaments
+    label: Tournaments
+    label_singular: Tournament
+    folder: src/content/tournaments
+    create: true
+    extension: yaml
+    format: yaml
+    summary: "{{name}} — {{placement}}"
+    fields:
+      - { name: name, label: Event name, widget: string }
+      - { name: date, label: Date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, picker_utc: true }
+      - { name: location, label: Location, widget: string }
+      - { name: placement, label: Placement, widget: string, hint: "e.g. 1st, Reserve Champion" }
+      - name: horse
+        label: Horse ridden
+        widget: relation
+        collection: horses
+        value_field: "{{slug}}"
+        search_fields: [name]
+        display_fields: [name]
+      - name: photos
+        label: Photos (optional)
+        widget: list
+        required: false
+        field:
+          name: image
+          label: Image
+          widget: image
+          media_folder: /src/assets/photos
+          public_folder: ../../assets/photos
+
+  - name: photos
+    label: Gallery
+    label_singular: Photo
+    folder: src/content/photos
+    create: true
+    extension: yaml
+    format: yaml
+    summary: "{{caption}}"
+    fields:
+      - name: image
+        label: Image
+        widget: image
+        media_folder: /src/assets/photos
+        public_folder: ../../assets/photos
+      - { name: caption, label: Caption, widget: string }
+      - name: horse
+        label: Horse (optional)
+        widget: relation
+        required: false
+        collection: horses
+        value_field: "{{slug}}"
+        search_fields: [name]
+        display_fields: [name]
+      - { name: year, label: Year, widget: number, value_type: int, min: 1990, max: 2035 }
