@@ -1,7 +1,7 @@
 ---
 name: Carlo
 breed: Selle Francais
-discipline: Show Jumping
+discipline: Hunters/Jumpers/Equitation
 foaled: 2016
 photo: ../../assets/horses/carlo.jpeg
 ---
