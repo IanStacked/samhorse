@@ -1,7 +1,6 @@
 ---
-# TODO: confirm — all fields below are placeholders
 name: Moose
-breed: Hanoverian
+breed: Belgium Warmblood
 discipline: Show Jumping
 foaled: 2015
 photo: ../../assets/horses/moose.jpeg
