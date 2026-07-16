@@ -1,7 +1,7 @@
 ---
 name: Gravy
 breed: Belgium Warmblood
-discipline: Dressage
+discipline: Hunters
 foaled: 2014
 photo: ../../assets/horses/gravy.jpeg
 ---
