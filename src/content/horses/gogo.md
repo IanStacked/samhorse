@@ -1,7 +1,7 @@
 ---
 name: Gogo
 breed: Selle Francais
-discipline: Eventing
+discipline: Hunters
 foaled: 2018
 photo: ../../assets/horses/gogo.JPG
 ---
