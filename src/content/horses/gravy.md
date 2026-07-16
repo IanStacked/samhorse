@@ -1,7 +1,6 @@
 ---
-# TODO: confirm — all fields below are placeholders
 name: Gravy
-breed: Irish Sport Horse
+breed: Belgium Warmblood
 discipline: Dressage
 foaled: 2014
 photo: ../../assets/horses/gravy.jpeg
