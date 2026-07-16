@@ -1,6 +1,6 @@
 ---
 name: Carlo
-breed: Dutch Warmblood
+breed: Selle Francais
 discipline: Show Jumping
 foaled: 2016
 photo: ../../assets/horses/carlo.jpeg
