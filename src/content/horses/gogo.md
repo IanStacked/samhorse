@@ -1,7 +1,6 @@
 ---
-# TODO: confirm — all fields below are placeholders
 name: Gogo
-breed: Connemara Pony
+breed: Selle Francais
 discipline: Eventing
 foaled: 2018
 photo: ../../assets/horses/gogo.JPG
