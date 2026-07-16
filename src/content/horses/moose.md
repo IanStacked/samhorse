@@ -1,7 +1,7 @@
 ---
 name: Moose
 breed: Belgium Warmblood
-discipline: Show Jumping
+discipline: Equitation
 foaled: 2015
 photo: ../../assets/horses/moose.jpeg
 ---
