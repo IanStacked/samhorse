@@ -1,0 +1,65 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const tournaments = await getCollection('tournaments');
+  return tournaments.map((t) => ({ params: { id: t.id }, props: { tournament: t } }));
+}
+
+const { tournament } = Astro.props;
+const { name, date, location, placement, photos = [] } = tournament.data;
+const horse = await getEntry(tournament.data.horse);
+
+const fmtDate = date.toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout title={name} description={`${name} — ${fmtDate}, ${location}.`}>
+  <article class="mx-auto max-w-4xl px-5 py-10 sm:py-14">
+    <a href="/tournaments" class="text-sm text-muted hover:text-accent">&larr; All tournaments</a>
+
+    <h1 class="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">{name}</h1>
+    <p class="mt-2 text-muted">
+      <time datetime={date.toISOString()}>{fmtDate}</time> &middot; {location}
+      {
+        horse && (
+          <>
+            {' '}&middot;{' '}
+            <a href={`/horses/${horse.id}`} class="hover:text-accent">{horse.data.name}</a>
+          </>
+        )
+      }
+    </p>
+    <p class="mt-4">
+      <span class="inline-block rounded-full bg-mist px-3 py-1 text-sm font-medium text-ink">
+        {placement}
+      </span>
+    </p>
+
+    {
+      photos.length > 0 && (
+        <section class="mt-14">
+          <h2 class="mb-4 text-2xl font-semibold tracking-tight">Photos</h2>
+          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            {photos.map((photo) => (
+              <li class="overflow-hidden rounded-lg bg-mist">
+                <Image
+                  src={photo}
+                  alt={`${name}${horse ? ` — ${horse.data.name}` : ''}`}
+                  widths={[240, 480, 720]}
+                  sizes="(min-width: 640px) 30vw, 45vw"
+                  class="aspect-square w-full object-cover"
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
