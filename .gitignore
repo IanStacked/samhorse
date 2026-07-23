@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # local Claude Code config / agent tooling (not part of the site)
 .claude/
+TODO.md
+PROJECT.yaml
+daily-reports/
+CLAUDE.md
