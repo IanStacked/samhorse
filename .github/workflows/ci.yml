@@ -1,0 +1,23 @@
+# Build + suite gate. PRs get it pre-merge; pushes to main cover the CMS,
+# which commits content straight to main and has broken the build before
+# (58088b1) — a red run here is the signal Cloudflare's deploy failed too.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx astro check
+      - run: npm run build
+      - run: npm test
