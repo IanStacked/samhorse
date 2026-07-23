@@ -6,7 +6,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, chore/complete-todos-2026-07-23]
 
 jobs:
   build-and-test:
