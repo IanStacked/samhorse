@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { defineCollection, reference } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
@@ -29,9 +30,14 @@ const tournaments = defineCollection({
     }),
 });
 
-// Photos — gallery items, filterable by horse or year.
+// Photos — gallery items, filterable by horse or year. No entries yet, and
+// astro's glob loader warns if the base directory doesn't exist; gate it so
+// the collection stays silent until real content shows up.
+const photosDir = './src/content/photos';
+const hasPhotos = fs.existsSync(photosDir) && fs.readdirSync(photosDir).some((f: string) => f.endsWith('.yaml'));
+
 const photos = defineCollection({
-  loader: glob({ pattern: '*.yaml', base: './src/content/photos' }),
+  loader: hasPhotos ? glob({ pattern: '*.yaml', base: photosDir }) : () => [],
   schema: ({ image }) =>
     z.object({
       image: image(),
