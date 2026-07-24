@@ -1,0 +1,41 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AccomplishmentList from '../components/AccomplishmentList.astro';
+import type { AccomplishmentItem } from '../types';
+
+const accomplishments = (await getCollection('accomplishments')).sort((a, b) =>
+  a.data.class.localeCompare(b.data.class),
+);
+
+const items: AccomplishmentItem[] = await Promise.all(
+  accomplishments.map(async (a) => {
+    const horse = a.data.horse ? await getEntry(a.data.horse) : undefined;
+    return {
+      id: a.id,
+      class: a.data.class,
+      position: a.data.position,
+      description: a.data.description,
+      horseId: horse?.id,
+      horseName: horse?.data.name,
+    };
+  }),
+);
+---
+
+<BaseLayout title="Accomplishments" description="Highlights and standout results.">
+  <section class="mx-auto max-w-4xl px-5 py-10 sm:py-14">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Accomplishments</h1>
+    <p class="mt-2 text-muted">Highlights, separate from the full show record.</p>
+
+    {
+      items.length > 0 ? (
+        <div class="mt-8">
+          <AccomplishmentList items={items} />
+        </div>
+      ) : (
+        <p class="mt-8 text-muted">No accomplishments yet.</p>
+      )
+    }
+  </section>
+</BaseLayout>

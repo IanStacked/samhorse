@@ -1,0 +1,32 @@
+---
+import { youtubeEmbedUrl } from '../youtube';
+
+interface Props {
+  urls?: string[];
+  title: string;
+}
+
+const { urls = [], title } = Astro.props;
+const embeds = urls.map(youtubeEmbedUrl).filter((u): u is string => u !== null);
+---
+
+{
+  embeds.length > 0 && (
+    <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {embeds.map((src) => (
+        <li class="overflow-hidden rounded-lg bg-mist">
+          <div class="aspect-video w-full">
+            <iframe
+              src={src}
+              title={title}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              class="h-full w-full"
+            />
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}

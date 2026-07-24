@@ -1,8 +1,8 @@
 ---
-import type { TournamentItem } from '../types';
+import type { ShowItem } from '../types';
 
 interface Props {
-  items: TournamentItem[];
+  items: ShowItem[];
   showHorse?: boolean;
 }
 
@@ -17,19 +17,27 @@ const fmtDate = (d: Date) =>
     items.map((t) => (
       <li>
         <a
-          href={`/tournaments/${t.id}`}
+          href={`/shows/${t.id}`}
           class="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"
         >
           <div>
             <p class="font-medium group-hover:text-accent">{t.name}</p>
             <p class="text-sm text-muted">
-              <time datetime={t.date.toISOString()}>{fmtDate(t.date)}</time> &middot; {t.location}
+              {t.date && (
+                <>
+                  <time datetime={t.date.toISOString()}>{fmtDate(t.date)}</time> &middot;{' '}
+                </>
+              )}
+              {t.location}
               {showHorse && t.horseName && <> &middot; {t.horseName}</>}
+              {t.rider && <> &middot; {t.rider}</>}
             </p>
           </div>
-          <span class="shrink-0 self-start rounded-full bg-mist px-3 py-1 text-sm font-medium text-ink sm:self-auto">
-            {t.placement}
-          </span>
+          {t.placement && (
+            <span class="shrink-0 self-start rounded-full bg-mist px-3 py-1 text-sm font-medium text-ink sm:self-auto">
+              {t.placement}
+            </span>
+          )}
         </a>
       </li>
     ))

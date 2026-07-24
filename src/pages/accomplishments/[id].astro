@@ -2,44 +2,38 @@
 import { getCollection, getEntry } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import VideoList from '../../components/VideoList.astro';
 
 export async function getStaticPaths() {
-  const tournaments = await getCollection('tournaments');
-  return tournaments.map((t) => ({ params: { id: t.id }, props: { tournament: t } }));
+  const accomplishments = await getCollection('accomplishments');
+  return accomplishments.map((a) => ({ params: { id: a.id }, props: { accomplishment: a } }));
 }
 
-const { tournament } = Astro.props;
-const { name, date, location, placement, photos = [] } = tournament.data;
-const horse = await getEntry(tournament.data.horse);
-
-const fmtDate = date.toLocaleDateString('en-GB', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
+const { accomplishment } = Astro.props;
+const { class: className, position, description, photos = [], videos = [] } = accomplishment.data;
+const horse = accomplishment.data.horse ? await getEntry(accomplishment.data.horse) : undefined;
 ---
 
-<BaseLayout title={name} description={`${name} — ${fmtDate}, ${location}.`}>
+<BaseLayout title={className} description={description}>
   <article class="mx-auto max-w-4xl px-5 py-10 sm:py-14">
-    <a href="/tournaments" class="text-sm text-muted hover:text-accent">&larr; All tournaments</a>
+    <a href="/accomplishments" class="text-sm text-muted hover:text-accent">&larr; All accomplishments</a>
 
-    <h1 class="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">{name}</h1>
+    <h1 class="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">{className}</h1>
     <p class="mt-2 text-muted">
-      <time datetime={date.toISOString()}>{fmtDate}</time> &middot; {location}
       {
         horse && (
           <>
-            {' '}&middot;{' '}
             <a href={`/horses/${horse.id}`} class="hover:text-accent">{horse.data.name}</a>
+            {' '}&middot;{' '}
           </>
         )
       }
-    </p>
-    <p class="mt-4">
       <span class="inline-block rounded-full bg-mist px-3 py-1 text-sm font-medium text-ink">
-        {placement}
+        {position}
       </span>
     </p>
+
+    <p class="mt-6 leading-relaxed text-ink">{description}</p>
 
     {
       photos.length > 0 && (
@@ -50,7 +44,7 @@ const fmtDate = date.toLocaleDateString('en-GB', {
               <li class="overflow-hidden rounded-lg bg-mist">
                 <Image
                   src={photo}
-                  alt={`${name}${horse ? ` — ${horse.data.name}` : ''}`}
+                  alt={`${className}${horse ? ` — ${horse.data.name}` : ''}`}
                   widths={[240, 480, 720]}
                   sizes="(min-width: 640px) 30vw, 45vw"
                   class="aspect-square w-full object-cover"
@@ -58,6 +52,15 @@ const fmtDate = date.toLocaleDateString('en-GB', {
               </li>
             ))}
           </ul>
+        </section>
+      )
+    }
+
+    {
+      videos.length > 0 && (
+        <section class="mt-14">
+          <h2 class="mb-4 text-2xl font-semibold tracking-tight">Videos</h2>
+          <VideoList urls={videos} title={className} />
         </section>
       )
     }

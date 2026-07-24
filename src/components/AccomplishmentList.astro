@@ -1,0 +1,32 @@
+---
+import type { AccomplishmentItem } from '../types';
+
+interface Props {
+  items: AccomplishmentItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="divide-y divide-mist border-y border-mist">
+  {
+    items.map((a) => (
+      <li>
+        <a
+          href={`/accomplishments/${a.id}`}
+          class="group flex flex-col gap-1 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"
+        >
+          <div>
+            <p class="font-medium group-hover:text-accent">{a.class}</p>
+            <p class="text-sm text-muted">
+              {a.horseName && <>{a.horseName}</>}
+            </p>
+          </div>
+          <span class="shrink-0 self-start rounded-full bg-mist px-3 py-1 text-sm font-medium text-ink sm:self-auto">
+            {a.position}
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>

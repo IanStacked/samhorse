@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { PhotoItem } from '../types';
+import VideoList from './VideoList.astro';
 
 interface Props {
   items: PhotoItem[];
@@ -32,6 +33,11 @@ const { items } = Astro.props;
             {p.caption}
             {p.horseName && <span class="text-ink"> &middot; {p.horseName}</span>}
           </figcaption>
+          {p.videos && p.videos.length > 0 && (
+            <div class="px-1 pb-2">
+              <VideoList urls={p.videos} title={p.caption} />
+            </div>
+          )}
         </figure>
       </li>
     ))

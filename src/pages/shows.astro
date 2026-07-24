@@ -1,0 +1,41 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ShowList from '../components/ShowList.astro';
+import type { ShowItem } from '../types';
+
+// Dated entries first (newest first); undated entries sort last, by name.
+const shows = (await getCollection('shows')).sort((a, b) => {
+  if (a.data.date && b.data.date) return b.data.date.getTime() - a.data.date.getTime();
+  if (!a.data.date && !b.data.date) return a.data.name.localeCompare(b.data.name);
+  return a.data.date ? -1 : 1;
+});
+
+const items: ShowItem[] = await Promise.all(
+  shows.map(async (t) => {
+    const horse = t.data.horse ? await getEntry(t.data.horse) : undefined;
+    return {
+      id: t.id,
+      name: t.data.name,
+      date: t.data.date,
+      location: t.data.location,
+      placement: t.data.placement,
+      rider: t.data.rider,
+      horseId: horse?.id,
+      horseName: horse?.data.name ?? t.data.horseName,
+      videos: t.data.videos,
+    };
+  }),
+);
+---
+
+<BaseLayout title="Shows" description="Competition results, newest first.">
+  <section class="mx-auto max-w-4xl px-5 py-10 sm:py-14">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Shows</h1>
+    <p class="mt-2 text-muted">Competition results, most recent first.</p>
+
+    <div class="mt-8">
+      <ShowList items={items} />
+    </div>
+  </section>
+</BaseLayout>
