@@ -3,6 +3,11 @@ import { defineCollection, reference } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
+// A collection with no entries yet warns via astro's glob loader if its base
+// directory doesn't exist; gate those with a no-op loader until real content
+// shows up, then the real glob loader takes over automatically.
+const hasYaml = (dir: string) => fs.existsSync(dir) && fs.readdirSync(dir).some((f: string) => f.endsWith('.yaml'));
+
 // Horses — bio lives in the markdown body; frontmatter holds the structured data.
 const horses = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/horses' }),
@@ -16,35 +21,55 @@ const horses = defineCollection({
     }),
 });
 
-// Tournaments — pure structured data. `horse` links to a horses entry.
-const tournaments = defineCollection({
+// Shows — pure structured data. `horse` links to a horses entry for
+// Samantha's own horses; `horseName` is a free-text fallback for a guest
+// horse she rode that isn't in the Horses collection (never shown on the
+// Horses page — that page only ever reads the `horse` relation). The
+// content folder keeps its original name (`tournaments`) — only the
+// user-facing label changed, so no entries need to move.
+const shows = defineCollection({
   loader: glob({ pattern: '*.yaml', base: './src/content/tournaments' }),
   schema: ({ image }) =>
     z.object({
       name: z.string(),
-      date: z.coerce.date(),
+      date: z.coerce.date().optional(),
       location: z.string(),
-      placement: z.string(), // free text: "1st", "Reserve Champion", etc.
-      horse: reference('horses'),
+      placement: z.string().optional(), // free text: "1st", "Reserve Champion", etc.
+      rider: z.string().optional(),
+      horse: reference('horses').optional(),
+      horseName: z.string().optional(),
       photos: z.array(image()).optional(),
+      videos: z.array(z.url()).optional(),
     }),
 });
 
-// Photos — gallery items, filterable by horse or year. No entries yet, and
-// astro's glob loader warns if the base directory doesn't exist; gate it so
-// the collection stays silent until real content shows up.
+// Photos — gallery items, filterable by horse or year.
 const photosDir = './src/content/photos';
-const hasPhotos = fs.existsSync(photosDir) && fs.readdirSync(photosDir).some((f: string) => f.endsWith('.yaml'));
-
 const photos = defineCollection({
-  loader: hasPhotos ? glob({ pattern: '*.yaml', base: photosDir }) : () => [],
+  loader: hasYaml(photosDir) ? glob({ pattern: '*.yaml', base: photosDir }) : () => [],
   schema: ({ image }) =>
     z.object({
       image: image(),
       caption: z.string(),
       horse: reference('horses').optional(),
       year: z.number().int(),
+      videos: z.array(z.url()).optional(),
     }),
 });
 
-export const collections = { horses, tournaments, photos };
+// Accomplishments — standalone highlights, separate from show results.
+const accomplishmentsDir = './src/content/accomplishments';
+const accomplishments = defineCollection({
+  loader: hasYaml(accomplishmentsDir) ? glob({ pattern: '*.yaml', base: accomplishmentsDir }) : () => [],
+  schema: ({ image }) =>
+    z.object({
+      class: z.string(), // the class competed in
+      horse: reference('horses').optional(),
+      position: z.string(),
+      description: z.string(),
+      photos: z.array(image()).optional(),
+      videos: z.array(z.url()).optional(),
+    }),
+});
+
+export const collections = { horses, shows, photos, accomplishments };

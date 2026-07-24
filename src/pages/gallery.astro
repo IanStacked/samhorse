@@ -17,6 +17,7 @@ const items: PhotoItem[] = await Promise.all(
       year: p.data.year,
       horseId: horse?.id,
       horseName: horse?.data.name,
+      videos: p.data.videos,
     };
   }),
 );

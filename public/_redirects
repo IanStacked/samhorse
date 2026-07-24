@@ -1,0 +1,3 @@
+# Old "tournaments" route, renamed to "shows" (sh5).
+/tournaments/*  /shows/:splat  301
+/tournaments    /shows         301

@@ -44,7 +44,7 @@ before(async () => {
 test('home renders the hero and links every section', async () => {
   const html = await page();
   assert.match(html, /Samantha Rodgers/);
-  for (const href of ['/horses', '/tournaments', '/gallery']) {
+  for (const href of ['/horses', '/shows', '/accomplishments', '/gallery']) {
     assert.ok(html.includes(`href="${href}"`), `home is missing a link to ${href}`);
   }
 });
@@ -69,32 +69,42 @@ test('each horse has a detail page with its name and photo', async () => {
   }
 });
 
-test('tournaments list shows every entry and links its detail page', async () => {
-  const html = await page('tournaments');
+// Show entries still live in src/content/tournaments/ on disk (sh5 renamed
+// only the user-facing label/route, not the content folder).
+test('shows list shows every entry and links its detail page', async () => {
+  const html = await page('shows');
   const ids = await contentIds('tournaments', '.yaml');
-  assert.ok(ids.length > 0, 'no tournament entries in src/content/tournaments');
+  assert.ok(ids.length > 0, 'no show entries in src/content/tournaments');
   for (const id of ids) {
     const name = await entryName('tournaments', `${id}.yaml`);
-    assert.ok(includesText(html, name), `tournaments list is missing ${name}`);
+    assert.ok(includesText(html, name), `shows list is missing ${name}`);
     assert.ok(
-      html.includes(`href="/tournaments/${id}"`),
-      `tournaments list row does not link to /tournaments/${id}`,
+      html.includes(`href="/shows/${id}"`),
+      `shows list row does not link to /shows/${id}`,
     );
   }
 });
 
-test('each tournament has a detail page with name, placement, and its photos', async () => {
+test('each show has a detail page with name, placement, and its photos', async () => {
   for (const id of await contentIds('tournaments', '.yaml')) {
-    const html = await page('tournaments', id);
+    const html = await page('shows', id);
     const raw = await readFile(join(ROOT, 'src/content/tournaments', `${id}.yaml`), 'utf8');
     const name = await entryName('tournaments', `${id}.yaml`);
-    assert.ok(includesText(html, name), `tournament page ${id} is missing its name`);
+    assert.ok(includesText(html, name), `show page ${id} is missing its name`);
     const placement = raw.match(/^placement:\s*["']?(.+?)["']?\s*$/m);
-    assert.ok(placement && includesText(html, placement[1]), `tournament page ${id} is missing its placement`);
+    if (placement) {
+      assert.ok(includesText(html, placement[1]), `show page ${id} is missing its placement`);
+    }
     if (/^photos:/m.test(raw)) {
-      assert.match(html, /<img/, `tournament page ${id} has photos in content but renders none`);
+      assert.match(html, /<img/, `show page ${id} has photos in content but renders none`);
     }
   }
+});
+
+test('old /tournaments URLs redirect to /shows', async () => {
+  const redirects = await readFile(join(DIST, '_redirects'), 'utf8');
+  assert.match(redirects, /\/tournaments\/\*\s+\/shows\/:splat\s+301/);
+  assert.match(redirects, /\/tournaments\s+\/shows\s+301/);
 });
 
 test('gallery renders with its filters', async () => {
@@ -102,6 +112,23 @@ test('gallery renders with its filters', async () => {
   assert.match(html, /Gallery/);
   assert.match(html, /id="filter-horse"/);
   assert.match(html, /id="filter-year"/);
+});
+
+test('accomplishments list renders, entries link their detail page', async () => {
+  const html = await page('accomplishments');
+  assert.match(html, /Accomplishments/);
+  const dirExists = await access(join(ROOT, 'src/content/accomplishments')).then(
+    () => true,
+    () => false,
+  );
+  const ids = dirExists ? await contentIds('accomplishments', '.yaml') : [];
+  if (ids.length === 0) {
+    assert.match(html, /No accomplishments yet/);
+  }
+  for (const id of ids) {
+    const html = await page('accomplishments', id);
+    assert.ok(html.length > 0, `accomplishment page ${id} did not render`);
+  }
 });
 
 test('the CMS admin page and its config ship in the build', async () => {

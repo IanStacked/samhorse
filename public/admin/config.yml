@@ -39,9 +39,11 @@ collections:
         public_folder: ../../assets/horses
       - { name: body, label: Bio, widget: markdown }
 
+  # Collection id/folder stay "tournaments" (the data on disk didn't move) —
+  # only the label changed to match the site's "Shows" rename (sh5).
   - name: tournaments
-    label: Tournaments
-    label_singular: Tournament
+    label: Shows
+    label_singular: Show
     folder: src/content/tournaments
     create: true
     extension: yaml
@@ -49,16 +51,22 @@ collections:
     summary: "{{name}} — {{placement}}"
     fields:
       - { name: name, label: Event name, widget: string }
-      - { name: date, label: Date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, picker_utc: true }
+      - { name: date, label: Date, widget: datetime, date_format: "YYYY-MM-DD", time_format: false, picker_utc: true, required: false }
       - { name: location, label: Location, widget: string }
-      - { name: placement, label: Placement, widget: string, hint: "e.g. 1st, Reserve Champion" }
+      - { name: placement, label: Placement, widget: string, hint: "e.g. 1st, Reserve Champion", required: false }
+      - { name: rider, label: Rider (optional), widget: string, required: false }
       - name: horse
-        label: Horse ridden
+        label: Horse ridden (optional)
         widget: relation
+        required: false
         collection: horses
         value_field: "{{slug}}"
         search_fields: [name]
         display_fields: [name]
+      - name: horseName
+        label: Horse name (free text, only if not one of Samantha's horses above)
+        widget: string
+        required: false
       - name: photos
         label: Photos (optional)
         widget: list
@@ -69,6 +77,11 @@ collections:
           widget: image
           media_folder: /src/assets/photos
           public_folder: ../../assets/photos
+      - name: videos
+        label: Videos (YouTube links, optional)
+        widget: list
+        required: false
+        field: { name: url, label: URL, widget: string }
 
   - name: photos
     label: Gallery
@@ -94,3 +107,44 @@ collections:
         search_fields: [name]
         display_fields: [name]
       - { name: year, label: Year, widget: number, value_type: int, min: 1990, max: 2035 }
+      - name: videos
+        label: Videos (YouTube links, optional)
+        widget: list
+        required: false
+        field: { name: url, label: URL, widget: string }
+
+  - name: accomplishments
+    label: Accomplishments
+    label_singular: Accomplishment
+    folder: src/content/accomplishments
+    create: true
+    extension: yaml
+    format: yaml
+    summary: "{{class}} — {{position}}"
+    fields:
+      - { name: class, label: Class competing in, widget: string }
+      - name: horse
+        label: Horse (optional)
+        widget: relation
+        required: false
+        collection: horses
+        value_field: "{{slug}}"
+        search_fields: [name]
+        display_fields: [name]
+      - { name: position, label: Position, widget: string, hint: "e.g. 1st, Reserve Champion" }
+      - { name: description, label: Description, widget: text }
+      - name: photos
+        label: Photos (optional)
+        widget: list
+        required: false
+        field:
+          name: image
+          label: Image
+          widget: image
+          media_folder: /src/assets/accomplishments
+          public_folder: ../../assets/accomplishments
+      - name: videos
+        label: Videos (YouTube links, optional)
+        widget: list
+        required: false
+        field: { name: url, label: URL, widget: string }
