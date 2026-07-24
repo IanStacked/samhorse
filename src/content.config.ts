@@ -1,12 +1,25 @@
 import fs from 'node:fs';
 import { defineCollection, reference } from 'astro:content';
 import { z } from 'astro/zod';
-import { glob } from 'astro/loaders';
+import { glob, type Loader } from 'astro/loaders';
 
 // A collection with no entries yet warns via astro's glob loader if its base
 // directory doesn't exist; gate those with a no-op loader until real content
 // shows up, then the real glob loader takes over automatically.
 const hasYaml = (dir: string) => fs.existsSync(dir) && fs.readdirSync(dir).some((f: string) => f.endsWith('.yaml'));
+
+// getCollection() itself warns "does not exist or is empty" whenever the
+// content store never registered the collection key, which a plain `() =>
+// []` loader doesn't do. Registering then immediately removing a
+// placeholder entry leaves the collection key present with zero entries,
+// which is enough for getCollection() to return [] silently.
+const emptyLoader: Loader = {
+  name: 'empty-collection-loader',
+  load: async ({ store }) => {
+    store.set({ id: '__empty__', data: {} });
+    store.delete('__empty__');
+  },
+};
 
 // Horses — bio lives in the markdown body; frontmatter holds the structured data.
 const horses = defineCollection({
@@ -46,7 +59,7 @@ const shows = defineCollection({
 // Photos — gallery items, filterable by horse or year.
 const photosDir = './src/content/photos';
 const photos = defineCollection({
-  loader: hasYaml(photosDir) ? glob({ pattern: '*.yaml', base: photosDir }) : () => [],
+  loader: hasYaml(photosDir) ? glob({ pattern: '*.yaml', base: photosDir }) : emptyLoader,
   schema: ({ image }) =>
     z.object({
       image: image(),
@@ -60,7 +73,7 @@ const photos = defineCollection({
 // Accomplishments — standalone highlights, separate from show results.
 const accomplishmentsDir = './src/content/accomplishments';
 const accomplishments = defineCollection({
-  loader: hasYaml(accomplishmentsDir) ? glob({ pattern: '*.yaml', base: accomplishmentsDir }) : () => [],
+  loader: hasYaml(accomplishmentsDir) ? glob({ pattern: '*.yaml', base: accomplishmentsDir }) : emptyLoader,
   schema: ({ image }) =>
     z.object({
       class: z.string(), // the class competed in
