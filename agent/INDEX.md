@@ -64,6 +64,7 @@
 - **Hosting**: live at **https://samhorse.pages.dev/** via **Cloudflare Pages (static)** connected to the repo — build `npm run build`, output `dist`, auto-rebuilds on push. Must be a *static Pages* project: the **Workers** import flow injects `@astrojs/cloudflare`, which breaks `<Image />` (routes it to a runtime Images binding) and force-adds a KV SESSION binding that fails to deploy. This site is fully static and needs **no adapter** — verify build logs have no `[@astrojs/cloudflare]` lines.
 - **CMS**: Sveltia CMS at `/admin` (`public/admin/`). `config.yml` collections **must stay in sync** with `src/content.config.ts` — if you add/rename a schema field, update both. Image fields use per-field `public_folder: ../../assets/<dir>` so saved paths are relative imports Astro can optimize.
 - **CMS auth**: simplest is a GitHub Personal Access Token (no infra); one-click "Sign in with GitHub" needs a (free) Sveltia CMS Authenticator worker + GitHub OAuth app, set via `backend.base_url` in `config.yml`. Sveltia also runs locally with no auth at `localhost:4321/admin/index.html` (Chromium, File System Access API) for testing.
+- **Rollback**: `scripts/rollback.sh` (no args: lists deployments; `<deployment-id>`: rolls production back to it). Needs `CLOUDFLARE_API_TOKEN` (Pages:Edit scope) and `CLOUDFLARE_ACCOUNT_ID` in the environment — never pass them as arguments. See `agent/decisions/ADR-0001-cloudflare-pages-rollback.md` for why it calls the Cloudflare API directly instead of wrangler.
 
 ## Gotchas
 
