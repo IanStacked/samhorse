@@ -13,7 +13,7 @@ set -uo pipefail
 URL="${SAMHORSE_URL:-https://samhorse.pages.dev/}"
 CHECKED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$URL" 2>/dev/null || echo 000)"
+HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$URL" 2>/dev/null)" || HTTP_CODE="000"
 
 case "$HTTP_CODE" in
   200)  LIVENESS="green" ;;
